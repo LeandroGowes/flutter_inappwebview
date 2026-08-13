@@ -397,8 +397,14 @@ class _CustomPlatformViewState extends State<CustomPlatformView> {
                       }
                     },
                     onPointerPanZoomUpdate: (ev) {
-                      _controller._setScrollDelta(
-                          ev.panDelta.dx, ev.panDelta.dy);
+                      // Precision touchpads can emit a small horizontal
+                      // delta during a vertical gesture. Forward only the
+                      // dominant axis so WebView2 keeps vertical scrolling.
+                      if (ev.panDelta.dx.abs() > ev.panDelta.dy.abs()) {
+                        _controller._setScrollDelta(ev.panDelta.dx, 0);
+                      } else {
+                        _controller._setScrollDelta(0, ev.panDelta.dy);
+                      }
                     },
                     child: MouseRegion(
                         cursor: _cursor,
